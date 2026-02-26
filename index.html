@@ -46,14 +46,25 @@
             color: #ffffff;
         }
 
-        /* ปุ่มปรับขนาดการ์ด */
+        /* ปรับสไตล์ปุ่มให้มินิมอล (ไม่มีกรอบ) */
         .size-btn {
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.3); /* สีเทาจางสำหรับปุ่มที่ไม่ได้เลือก */
         }
         .size-btn.active {
-            background-color: white;
-            color: black;
-            border-color: white;
+            color: #ffffff; /* สีขาวชัดสำหรับปุ่มที่เลือกอยู่ */
+        }
+        .size-btn svg rect {
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+        /* ถ้า active ให้ถมสีข้างในไอคอนเล็กน้อยเพื่อให้ดู Pop ขึ้น */
+        .size-btn.active svg rect {
+            fill: rgba(255, 255, 255, 0.1);
         }
     </style>
 </head>
@@ -104,13 +115,35 @@
                     </select>
                 </div>
 
-                <!-- มุมมองและขนาดการ์ด -->
+                <!-- มุมมองและขนาดการ์ด (มินิมอลสไตล์ - ไม่มีกรอบ) -->
                 <div class="flex flex-wrap items-center justify-between gap-4">
-                    <div class="flex items-center gap-2 bg-zinc-900/50 p-1.5 rounded-2xl border border-white/5">
-                        <span class="text-[10px] uppercase font-bold text-zinc-500 px-3 tracking-widest">ขนาดการ์ด:</span>
-                        <button onclick="changeCardSize('normal')" id="btn-normal" class="size-btn active px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-widest border border-transparent">มาตรฐาน</button>
-                        <button onclick="changeCardSize('small')" id="btn-small" class="size-btn px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-widest border border-transparent">เล็ก</button>
-                        <button onclick="changeCardSize('compact')" id="btn-compact" class="size-btn px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-widest border border-transparent">จิ๋ว</button>
+                    <div class="flex items-center gap-6 px-2">
+                        <!-- ขนาดมาตรฐาน (1 ช่อง) -->
+                        <button onclick="changeCardSize('normal')" id="btn-normal" class="size-btn active p-1" title="ขนาดมาตรฐาน">
+                            <svg width="22" height="22" viewBox="0 0 24 24">
+                                <rect x="4" y="4" width="16" height="16" rx="2" />
+                            </svg>
+                        </button>
+                        <!-- ขนาดเล็ก (4 ช่อง 2x2) -->
+                        <button onclick="changeCardSize('small')" id="btn-small" class="size-btn p-1" title="ขนาดเล็ก">
+                            <svg width="22" height="22" viewBox="0 0 24 24">
+                                <rect x="3" y="3" width="8" height="8" rx="1.5" />
+                                <rect x="13" y="3" width="8" height="8" rx="1.5" />
+                                <rect x="3" y="13" width="8" height="8" rx="1.5" />
+                                <rect x="13" y="13" width="8" height="8" rx="1.5" />
+                            </svg>
+                        </button>
+                        <!-- ขนาดจิ๋ว (6 ช่อง 2x3) -->
+                        <button onclick="changeCardSize('compact')" id="btn-compact" class="size-btn p-1" title="ขนาดจิ๋ว">
+                            <svg width="24" height="22" viewBox="0 0 24 24">
+                                <rect x="2" y="3" width="6" height="8" rx="1" />
+                                <rect x="9" y="3" width="6" height="8" rx="1" />
+                                <rect x="16" y="3" width="6" height="8" rx="1" />
+                                <rect x="2" y="13" width="6" height="8" rx="1" />
+                                <rect x="9" y="13" width="6" height="8" rx="1" />
+                                <rect x="16" y="13" width="6" height="8" rx="1" />
+                            </svg>
+                        </button>
                     </div>
                     <div id="resultCount" class="text-[11px] uppercase font-bold text-zinc-600 tracking-widest"></div>
                 </div>
@@ -308,7 +341,6 @@
             const totalPages = Math.ceil(filteredGames.length / ITEMS_PER_PAGE);
             let gamesToShow = isShowAll ? filteredGames : filteredGames.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
-            // ปรับแต่ง Grid ตามขนาด
             let gridClasses = "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5";
             if (currentCardSize === 'small') gridClasses = "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6";
             if (currentCardSize === 'compact') gridClasses = "grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8";
@@ -374,7 +406,7 @@
                     <div class="${padding} flex flex-col flex-grow">
                         <div class="flex flex-col gap-1.5 mb-3 text-zinc-500 font-bold tracking-widest">
                             <div class="${infoTextSize} uppercase opacity-80">
-                                ${currentCardSize === 'compact' ? game.lang : 'ภาษาเกม: ' + game.lang + ' | คู่มือ: ' + game.manual}
+                                ${currentCardSize === 'compact' ? game.lang : 'เวอร์ชั่น: ' + game.lang + ' | คู่มือ: ' + game.manual}
                             </div>
                             <div class="flex min-h-[20px] items-center">
                                 ${typeDisplay}
@@ -397,7 +429,6 @@
             }).join('');
             lucide.createIcons();
 
-            // Pagination Controls
             if (filteredGames.length > ITEMS_PER_PAGE) {
                 if (isShowAll) {
                     paginationContainer.innerHTML = `

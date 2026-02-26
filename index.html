@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meanbook Rental - Board Game Catalog</title>
+    <title>MEANBOOK Rental</title>
+    <link id="dynamic-favicon" rel="icon" href="">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -273,6 +274,9 @@
                             bannerImg.onerror = () => loadDefaultBanner();
                         }
                         if (key === 'BGG Logo') gameLogoUrl = formatDriveImageUrl(value);
+                        if (key === 'Favicon') {
+                            document.getElementById('dynamic-favicon').href = formatDriveImageUrl(value);
+                        }
                     });
                 } else { loadDefaultBanner(); }
             } catch (e) { loadDefaultBanner(); }

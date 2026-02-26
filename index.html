@@ -27,9 +27,6 @@
             box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5); 
         }
         
-        .status-available { color: #4ade80; background: rgba(74, 222, 128, 0.15); border: 1px solid rgba(74, 222, 128, 0.3); }
-        .status-unavailable { color: #f87171; background: rgba(248, 113, 113, 0.15); border: 1px solid rgba(248, 113, 113, 0.3); }
-        .status-pending { color: #a1a1aa; background: rgba(161, 161, 170, 0.15); border: 1px solid rgba(161, 161, 170, 0.3); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .fade-in { animation: fadeIn 0.8s ease-out forwards; }
         ::-webkit-scrollbar { width: 5px; }
@@ -47,6 +44,16 @@
         select option {
             background-color: #1a1a1a;
             color: #ffffff;
+        }
+
+        /* ปุ่มปรับขนาดการ์ด */
+        .size-btn {
+            transition: all 0.3s ease;
+        }
+        .size-btn.active {
+            background-color: white;
+            color: black;
+            border-color: white;
         }
     </style>
 </head>
@@ -83,17 +90,30 @@
     <main class="max-w-[1600px] mx-auto px-6 pt-12 pb-20 flex-grow w-full">
         <!-- Search Controls -->
         <section id="games" class="mb-20">
-            <div class="flex flex-col md:flex-row gap-6 mb-12">
-                <div class="relative flex-1">
-                    <i data-lucide="search" class="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-600 w-5 h-5"></i>
-                    <input type="text" id="searchInput" placeholder="ค้นหาชื่อเกม..." class="w-full bg-zinc-900/40 border border-white/10 rounded-2xl py-6 pl-16 pr-8 focus:outline-none focus:border-white/30 transition-all text-white text-lg">
+            <div class="flex flex-col gap-6 mb-12">
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="relative flex-1">
+                        <i data-lucide="search" class="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-600 w-5 h-5"></i>
+                        <input type="text" id="searchInput" placeholder="ค้นหาชื่อเกม..." class="w-full bg-zinc-900/40 border border-white/10 rounded-2xl py-6 pl-16 pr-8 focus:outline-none focus:border-white/30 transition-all text-white text-lg">
+                    </div>
+                    <select id="statusFilter" class="bg-zinc-900 border border-white/10 rounded-2xl px-8 py-4 md:py-0 focus:outline-none text-sm font-bold tracking-widest text-white appearance-none cursor-pointer min-w-[200px]">
+                        <option value="all">สถานะทั้งหมด</option>
+                        <option value="ว่าง">ว่าง</option>
+                        <option value="ติดเช่า">ติดเช่า</option>
+                        <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
+                    </select>
                 </div>
-                <select id="statusFilter" class="bg-zinc-900 border border-white/10 rounded-2xl px-8 focus:outline-none text-sm font-bold tracking-widest text-white appearance-none cursor-pointer min-w-[200px]">
-                    <option value="all">สถานะทั้งหมด</option>
-                    <option value="ว่าง">ว่าง</option>
-                    <option value="ติดเช่า">ติดเช่า</option>
-                    <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
-                </select>
+
+                <!-- มุมมองและขนาดการ์ด -->
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-2 bg-zinc-900/50 p-1.5 rounded-2xl border border-white/5">
+                        <span class="text-[10px] uppercase font-bold text-zinc-500 px-3 tracking-widest">ขนาดการ์ด:</span>
+                        <button onclick="changeCardSize('normal')" id="btn-normal" class="size-btn active px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-widest border border-transparent">มาตรฐาน</button>
+                        <button onclick="changeCardSize('small')" id="btn-small" class="size-btn px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-widest border border-transparent">เล็ก</button>
+                        <button onclick="changeCardSize('compact')" id="btn-compact" class="size-btn px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-widest border border-transparent">จิ๋ว</button>
+                    </div>
+                    <div id="resultCount" class="text-[11px] uppercase font-bold text-zinc-600 tracking-widest"></div>
+                </div>
             </div>
 
             <!-- Loader -->
@@ -103,7 +123,7 @@
             </div>
 
             <!-- Grid Display -->
-            <div id="gamesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-10"></div>
+            <div id="gamesGrid" class="grid gap-6 md:gap-10"></div>
             <div id="noResults" class="hidden text-center py-40"><p class="text-zinc-500 text-xl font-light">ไม่พบเกมที่คุณค้นหาครับ คุณเม </p></div>
 
             <!-- Pagination Controls -->
@@ -115,7 +135,6 @@
     <footer class="border-t border-white/10 bg-black/60 pt-16 pb-8 mt-auto">
         <div class="max-w-[1600px] mx-auto px-6">
             <div class="flex flex-col md:flex-row justify-between gap-12 mb-12">
-                
                 <!-- Brand Info -->
                 <div class="flex flex-col gap-4 max-w-sm">
                     <div class="flex items-center gap-3">
@@ -147,8 +166,6 @@
                     </p>
                 </div>
             </div>
-
-            <!-- Copyright -->
             <div class="pt-8 border-t border-white/5 flex justify-center items-center">
                 <p class="text-zinc-600 text-xs tracking-widest uppercase text-center">Copyright © 2026 Meanbook. All rights reserved.</p>
             </div>
@@ -160,15 +177,10 @@
         const CONTACT_LINK = 'https://line.me/ti/p/@meanbook';
         const ASSETS_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSboMt8lu6Md3_4KGIZ3QoBCeCO-3RGCg0TVnD4B-zy4TOjQrFExssmO34xciDHLCFUCBhQC3Wixto3/pub?gid=283486066&single=true&output=csv'; 
         
-        const mockData = [
-            { name: "28 Days (ไทย)", type: "https://boardgamegeek.com/boardgame/344073/28-days", lang: "ไทย", manual: "มี", status: "ว่าง", price: "100", deposit: "500", value: "850", img: "https://images.unsplash.com/photo-1610812382607-4f6593450cc7?q=80&w=800" },
-            { name: "Sheriff of Nottingham", type: "Party Game", lang: "ไทย", manual: "มี", status: "ติดเช่า", price: "150", deposit: "1000", value: "1550", img: "https://images.unsplash.com/photo-1611996575749-79a3a250f948?q=80&w=800" },
-            { name: "3 Chapters", type: "Family", lang: "ไทย", manual: "ไม่มี", status: "กำลังดำเนินการ", price: "50", deposit: "300", value: "590", img: "https://images.unsplash.com/photo-1553481199-462d225edec4?q=80&w=800" }
-        ];
-
         let allGames = [];
         let filteredGames = [];
         let gameLogoUrl = ''; 
+        let currentCardSize = 'normal'; // normal, small, compact
         
         const ITEMS_PER_PAGE = 20; 
         let currentPage = 1;
@@ -205,16 +217,14 @@
                             bannerImg.onload = () => bannerImg.classList.remove('opacity-0');
                             bannerImg.onerror = () => loadDefaultBanner();
                         }
-                        if (key === 'BGG Logo') {
-                            gameLogoUrl = formatDriveImageUrl(value);
-                        }
+                        if (key === 'BGG Logo') gameLogoUrl = formatDriveImageUrl(value);
                     });
                 } else { loadDefaultBanner(); }
             } catch (e) { loadDefaultBanner(); }
 
             try {
                 const response = await fetch(SHEET_URL);
-                if (!response.ok) throw new Error('Local connection blocked');
+                if (!response.ok) throw new Error('Network error');
                 const data = await response.text();
                 const rows = data.split('\n');
                 allGames = rows.slice(1).map(row => {
@@ -236,33 +246,31 @@
                 document.getElementById('loading').style.display = 'none';
             } catch (error) {
                 document.getElementById('loading').style.display = 'none';
-                allGames = mockData;
-                filteredGames = [...allGames];
                 renderPaginated();
             }
         }
 
         function loadDefaultBanner() {
             const bannerImg = document.getElementById('mainBanner');
-            bannerImg.src = 'banner.png';
-            bannerImg.onload = () => bannerImg.classList.remove('opacity-0');
-            bannerImg.onerror = () => {
-                bannerImg.src = 'https://via.placeholder.com/1200x500/111/fff?text=Meanbook+Rental+Banner';
-                bannerImg.classList.remove('opacity-0');
-            };
+            bannerImg.src = 'https://via.placeholder.com/1200x500/111/fff?text=Meanbook+Rental+Banner';
+            bannerImg.classList.remove('opacity-0');
+        }
+
+        function changeCardSize(size) {
+            currentCardSize = size;
+            document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-${size}`).classList.add('active');
+            renderPaginated();
         }
 
         function applyFilters() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const statusTerm = document.getElementById('statusFilter').value;
-            
             filteredGames = allGames.filter(g => {
                 const matchSearch = g.name.toLowerCase().includes(searchTerm);
-                const gameStatus = (g.status || '').trim();
-                const matchStatus = statusTerm === 'all' || gameStatus === statusTerm;
+                const matchStatus = statusTerm === 'all' || (g.status || '').trim() === statusTerm;
                 return matchSearch && matchStatus;
             });
-            
             currentPage = 1; 
             isShowAll = false; 
             renderPaginated();
@@ -285,7 +293,10 @@
             const grid = document.getElementById('gamesGrid');
             const noResults = document.getElementById('noResults');
             const paginationContainer = document.getElementById('paginationControls');
+            const resultCount = document.getElementById('resultCount');
             
+            resultCount.innerText = `พบ ${filteredGames.length} รายการ`;
+
             if (filteredGames.length === 0) {
                 grid.innerHTML = '';
                 noResults.classList.remove('hidden');
@@ -295,38 +306,58 @@
             noResults.classList.add('hidden');
 
             const totalPages = Math.ceil(filteredGames.length / ITEMS_PER_PAGE);
-            let gamesToShow = [];
+            let gamesToShow = isShowAll ? filteredGames : filteredGames.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
-            if (isShowAll) {
-                gamesToShow = filteredGames;
-            } else {
-                if (currentPage > totalPages) currentPage = totalPages;
-                if (currentPage < 1) currentPage = 1;
-
-                const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-                const endIndex = startIndex + ITEMS_PER_PAGE;
-                gamesToShow = filteredGames.slice(startIndex, endIndex);
-            }
+            // ปรับแต่ง Grid ตามขนาด
+            let gridClasses = "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5";
+            if (currentCardSize === 'small') gridClasses = "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6";
+            if (currentCardSize === 'compact') gridClasses = "grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8";
+            
+            grid.className = `grid ${gridClasses} gap-4 md:gap-8`;
 
             grid.innerHTML = gamesToShow.map(game => {
                 const statusStr = (game.status || '').trim();
                 const isAvailable = statusStr === 'ว่าง';
+                const finalLink = `${CONTACT_LINK}?text=${encodeURIComponent('สนใจเช่า: ' + game.name)}`;
                 
-                const finalLink = `${CONTACT_LINK}${CONTACT_LINK.includes('?') ? '&' : '?'}text=${encodeURIComponent('สนใจเช่า: ' + game.name)}`;
-                
+                let logoSize = "h-10";
+                let padding = "p-6 sm:p-8";
+                let titleSize = "text-lg";
+                let infoTextSize = "text-[14px]";
+                let priceBoxPadding = "p-4";
+                let btnTextSize = "text-[20px]";
+                let btnPadding = "py-4";
+
+                if (currentCardSize === 'small') {
+                    logoSize = "h-7";
+                    padding = "p-4";
+                    titleSize = "text-base";
+                    infoTextSize = "text-[12px]";
+                    priceBoxPadding = "p-3";
+                    btnTextSize = "text-[16px]";
+                    btnPadding = "py-3";
+                } else if (currentCardSize === 'compact') {
+                    logoSize = "h-5";
+                    padding = "p-3";
+                    titleSize = "text-sm";
+                    infoTextSize = "text-[10px]";
+                    priceBoxPadding = "p-2";
+                    btnTextSize = "text-[14px]";
+                    btnPadding = "py-2.5";
+                }
+
                 let typeDisplay = '';
                 if (game.type && game.type.toLowerCase().startsWith('http')) {
                     if (gameLogoUrl) {
-                        typeDisplay = `<a href="${game.type}" target="_blank" class="transition-all hover:scale-105 inline-block"><img src="${gameLogoUrl}" class="h-10 object-contain opacity-90 hover:opacity-100 transition-opacity" alt="BGG Link"></a>`;
+                        typeDisplay = `<a href="${game.type}" target="_blank" class="transition-all hover:scale-105 inline-block"><img src="${gameLogoUrl}" class="${logoSize} object-contain opacity-90 hover:opacity-100 transition-opacity" alt="BGG"></a>`;
                     } else {
-                        typeDisplay = `<a href="${game.type}" target="_blank" class="text-[12px] text-zinc-500 hover:text-white underline truncate max-w-[150px] inline-block font-bold">BGG Link</a>`;
+                        typeDisplay = `<a href="${game.type}" target="_blank" class="${infoTextSize} text-zinc-500 hover:text-white underline truncate max-w-[100px] inline-block font-bold">BGG</a>`;
                     }
                 }
 
                 let buttonStyles = '';
                 if (statusStr === 'ว่าง') {
-                    // เพิ่ม transition-transform hover:scale-105 เพื่อให้ปุ่มขยายตัวเมื่อชี้เมาส์
-                    buttonStyles = 'bg-green-500 text-black hover:bg-green-400 shadow-lg shadow-green-500/20 transition-transform hover:scale-105 active:scale-95';
+                    buttonStyles = 'bg-green-500 text-black hover:bg-green-400 shadow-lg shadow-green-500/20 transition-transform hover:scale-105 active:scale-95 cursor-pointer';
                 } else if (statusStr === 'ติดเช่า') {
                     buttonStyles = 'bg-red-600 text-white cursor-not-allowed pointer-events-none opacity-90 shadow-lg shadow-red-900/20';
                 } else if (statusStr === 'กำลังดำเนินการ') {
@@ -336,28 +367,28 @@
                 }
 
                 return `
-                <div class="glass-card overflow-hidden group flex flex-col">
+                <div class="glass-card overflow-hidden group flex flex-col shadow-2xl">
                     <div class="aspect-square relative overflow-hidden bg-transparent">
                         <img src="${game.img}" class="w-full h-full object-contain transition-transform duration-1000 group-hover:scale-105" onerror="this.src='https://via.placeholder.com/400x400/111/fff?text=Meanbook'">
                     </div>
-                    <div class="p-6 sm:p-8 flex flex-col flex-grow">
-                        <div class="flex flex-col gap-2.5 mb-4 text-zinc-500 font-bold tracking-widest">
-                            <div class="text-[14px] uppercase">
-                                ภาษาเกม : ${game.lang} &nbsp; | &nbsp; คู่มือไทย : ${game.manual}
+                    <div class="${padding} flex flex-col flex-grow">
+                        <div class="flex flex-col gap-1.5 mb-3 text-zinc-500 font-bold tracking-widest">
+                            <div class="${infoTextSize} uppercase opacity-80">
+                                ${currentCardSize === 'compact' ? game.lang : 'ภาษาเกม: ' + game.lang + ' | คู่มือ: ' + game.manual}
                             </div>
-                            <div class="flex min-h-[40px] items-center">
+                            <div class="flex min-h-[20px] items-center">
                                 ${typeDisplay}
                             </div>
                         </div>
-                        <h3 class="text-lg font-bold mb-6 line-clamp-2 min-h-[3rem] leading-tight">${game.name}</h3>
+                        <h3 class="${titleSize} font-bold mb-4 line-clamp-2 min-h-[2.5rem] leading-tight text-zinc-100">${game.name}</h3>
                         
                         <div class="mt-auto">
-                            <div class="grid grid-cols-2 gap-3 mb-6">
-                                <div class="p-4 rounded-2xl bg-white/5 border border-white/5"><p class="text-[14px] text-zinc-500 uppercase mb-1.5 tracking-widest">ค่าเช่า/วัน</p><p class="text-lg font-bold text-white">${game.price || '0'}.-</p></div>
-                                <div class="p-4 rounded-2xl bg-white/5 border border-white/5"><p class="text-[14px] text-zinc-500 uppercase mb-1.5 tracking-widest">มัดจำ</p><p class="text-lg font-bold text-white">${game.deposit || '0'}.-</p></div>
+                            <div class="grid grid-cols-2 gap-2 mb-4">
+                                <div class="${priceBoxPadding} rounded-xl bg-white/5 border border-white/5"><p class="${infoTextSize} text-zinc-500 uppercase mb-1 tracking-widest">${currentCardSize === 'compact' ? 'เช่า' : 'ค่าเช่า'}</p><p class="${titleSize} font-bold text-white">${game.price}.-</p></div>
+                                <div class="${priceBoxPadding} rounded-xl bg-white/5 border border-white/5"><p class="${infoTextSize} text-zinc-500 uppercase mb-1 tracking-widest">มัดจำ</p><p class="${titleSize} font-bold text-white">${game.deposit}.-</p></div>
                             </div>
                             <a href="${isAvailable ? finalLink : '#'}" target="_blank" 
-                               class="block w-full py-4 rounded-2xl font-black text-[20px] text-center tracking-[0.2em] transition-all ${buttonStyles}">
+                               class="block w-full ${btnPadding} rounded-xl font-black ${btnTextSize} text-center tracking-[0.1em] transition-all ${buttonStyles}">
                                 ${statusStr}
                             </a>
                         </div>
@@ -366,38 +397,34 @@
             }).join('');
             lucide.createIcons();
 
+            // Pagination Controls
             if (filteredGames.length > ITEMS_PER_PAGE) {
                 if (isShowAll) {
                     paginationContainer.innerHTML = `
                         <button onclick="toggleShowAll()" class="px-8 py-4 rounded-2xl bg-white/10 border border-white/20 text-white font-bold tracking-widest uppercase text-sm transition-all hover:bg-white/20 flex items-center shadow-lg">
-                            <i data-lucide="layout-grid" class="w-4 h-4 mr-3"></i> แสดงแบบแบ่งหน้า
+                            <i data-lucide="layout-grid" class="w-4 h-4 mr-3"></i> กลับไปแบ่งหน้า
                         </button>
                     `;
                 } else {
                     paginationContainer.innerHTML = `
-                        <div class="flex flex-col md:flex-row items-center gap-4 md:gap-6 bg-zinc-900/40 p-2 md:p-3 rounded-[2rem] border border-white/5">
+                        <div class="flex flex-col md:flex-row items-center gap-4 bg-zinc-900/40 p-2 rounded-[2rem] border border-white/5">
                             <div class="flex items-center gap-2">
-                                <button onclick="changePage(-1)" class="px-5 py-3 rounded-2xl bg-white/5 text-white font-bold tracking-widest uppercase text-sm transition-all hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed flex items-center" ${currentPage === 1 ? 'disabled' : ''}>
-                                    <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i> ก่อนหน้า
+                                <button onclick="changePage(-1)" class="px-5 py-3 rounded-2xl bg-white/5 text-white font-bold text-xs transition-all hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed flex items-center" ${currentPage === 1 ? 'disabled' : ''}>
+                                    <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i>
                                 </button>
-                                <span class="text-zinc-400 font-bold tracking-widest text-sm px-2 whitespace-nowrap">
-                                    ${currentPage} / ${totalPages}
-                                </span>
-                                <button onclick="changePage(1)" class="px-5 py-3 rounded-2xl bg-white/5 text-white font-bold tracking-widest uppercase text-sm transition-all hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed flex items-center" ${currentPage === totalPages ? 'disabled' : ''}>
-                                    ถัดไป <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+                                <span class="text-zinc-400 font-bold text-xs px-2 whitespace-nowrap">${currentPage} / ${totalPages}</span>
+                                <button onclick="changePage(1)" class="px-5 py-3 rounded-2xl bg-white/5 text-white font-bold text-xs transition-all hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed flex items-center" ${currentPage === totalPages ? 'disabled' : ''}>
+                                    <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
                                 </button>
                             </div>
-                            <div class="hidden md:block w-px h-8 bg-white/10 mx-2"></div>
-                            <button onclick="toggleShowAll()" class="px-6 py-3 rounded-2xl bg-white/10 text-white hover:bg-white/20 font-bold tracking-widest uppercase text-sm transition-all flex items-center w-full md:w-auto justify-center">
+                            <button onclick="toggleShowAll()" class="px-6 py-3 rounded-2xl bg-white/10 text-white hover:bg-white/20 font-bold text-xs transition-all uppercase tracking-widest">
                                 ดูทั้งหมด (${filteredGames.length})
                             </button>
                         </div>
                     `;
                 }
                 lucide.createIcons();
-            } else {
-                paginationContainer.innerHTML = '';
-            }
+            } else { paginationContainer.innerHTML = ''; }
         }
 
         document.getElementById('searchInput').addEventListener('input', applyFilters);

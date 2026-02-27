@@ -145,35 +145,35 @@
                                 </svg>
                             </button>
                             <!-- ขนาดจิ๋ว (6 ช่อง 3x2) -->
-                        <button onclick="changeCardSize('compact')" id="btn-compact" class="size-btn w-11 h-full rounded-xl" title="ขนาดจิ๋ว">
-                            <svg width="22" height="20" viewBox="0 0 24 24">
-                                <rect x="2" y="5" width="5.5" height="5.5" rx="1" />
-                                <rect x="9.25" y="5" width="5.5" height="5.5" rx="1" />
-                                <rect x="16.5" y="5" width="5.5" height="5.5" rx="1" />
-                                <rect x="2" y="13.5" width="5.5" height="5.5" rx="1" />
-                                <rect x="9.25" y="13.5" width="5.5" height="5.5" rx="1" />
-                                <rect x="16.5" y="13.5" width="5.5" height="5.5" rx="1" />
-                            </svg>
-                        </button>
-                    </div>
+                            <button onclick="changeCardSize('compact')" id="btn-compact" class="size-btn w-11 h-full rounded-xl" title="ขนาดจิ๋ว">
+                                <svg width="22" height="20" viewBox="0 0 24 24">
+                                    <rect x="2" y="5" width="5.5" height="5.5" rx="1" />
+                                    <rect x="9.25" y="5" width="5.5" height="5.5" rx="1" />
+                                    <rect x="16.5" y="5" width="5.5" height="5.5" rx="1" />
+                                    <rect x="2" y="13.5" width="5.5" height="5.5" rx="1" />
+                                    <rect x="9.25" y="13.5" width="5.5" height="5.5" rx="1" />
+                                    <rect x="16.5" y="13.5" width="5.5" height="5.5" rx="1" />
+                                </svg>
+                            </button>
+                        </div>
 
-                    <!-- เมนูสำหรับเรียงลำดับข้อมูล (ปรับให้กระชับพอดีข้อความที่สุด) -->
-                    <div class="relative flex items-center bg-white/5 border border-white/10 rounded-2xl h-[48px] hover:bg-white/10 transition-colors w-max">
-                        <select id="sortFilter" class="bg-transparent border-none pl-4 pr-8 focus:outline-none text-[11px] sm:text-xs font-bold tracking-wider text-white appearance-none cursor-pointer h-full">
-                            <option value="az">เรียง A-Z</option>
-                            <option value="za">เรียง Z-A</option>
-                            <option value="newest">ใหม่ล่าสุด</option>
-                        </select>
-                        <i data-lucide="chevron-down" class="absolute right-2.5 w-4 h-4 text-zinc-400 pointer-events-none"></i>
+                        <!-- เมนูสำหรับเรียงลำดับข้อมูล (ปรับให้กระชับพอดีข้อความที่สุด) -->
+                        <div class="relative flex items-center bg-white/5 border border-white/10 rounded-2xl h-[48px] hover:bg-white/10 transition-colors w-max">
+                            <select id="sortFilter" class="bg-transparent border-none pl-4 pr-8 focus:outline-none text-[11px] sm:text-xs font-bold tracking-wider text-white appearance-none cursor-pointer h-full">
+                                <option value="az">เรียง A-Z</option>
+                                <option value="za">เรียง Z-A</option>
+                                <option value="newest">ใหม่ล่าสุด</option>
+                            </select>
+                            <i data-lucide="chevron-down" class="absolute right-2.5 w-4 h-4 text-zinc-400 pointer-events-none"></i>
+                        </div>
                     </div>
+                    
+                    <div id="resultCount" class="text-[11px] uppercase font-bold text-zinc-600 tracking-widest"></div>
                 </div>
-                
-                <div id="resultCount" class="text-[11px] uppercase font-bold text-zinc-600 tracking-widest"></div>
             </div>
-        </div>
 
-        <!-- Loader -->
-        <div id="loading" class="flex flex-col items-center justify-center py-40">
+            <!-- Loader -->
+            <div id="loading" class="flex flex-col items-center justify-center py-40">
                 <div class="w-12 h-12 border-2 border-zinc-800 border-t-white rounded-full animate-spin mb-6"></div>
                 <p id="loadingText" class="text-zinc-600 font-bold uppercase tracking-widest text-[10px]">Syncing Inventory...</p>
             </div>
@@ -237,10 +237,42 @@
         let filteredGames = [];
         let gameLogoUrl = ''; 
         let currentCardSize = 'normal'; // normal, small, compact
-        
-        const ITEMS_PER_PAGE = 20; 
         let currentPage = 1;
         let isShowAll = false; 
+
+        // ดักจับการย่อ/ขยายหน้าจอเพื่อคำนวณจำนวนคอลัมน์ใหม่ (ป้องกันการกระตุกด้วย setTimeout)
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if(!isShowAll) renderPaginated();
+            }, 150);
+        });
+
+        // ฟังก์ชันคำนวณจำนวนคอลัมน์ตามความกว้างหน้าจอ
+        function getColumnsCount() {
+            const width = window.innerWidth;
+            if (currentCardSize === 'normal') {
+                if (width >= 1536) return 5;      // 2xl
+                if (width >= 1280) return 4;      // xl
+                if (width >= 1024) return 3;      // lg
+                if (width >= 640) return 2;       // sm
+                return 1;                         // mobile
+            } else if (currentCardSize === 'small') {
+                if (width >= 1280) return 6;
+                if (width >= 1024) return 5;
+                if (width >= 768) return 4;       // md
+                if (width >= 640) return 3;
+                return 2;
+            } else if (currentCardSize === 'compact') {
+                if (width >= 1280) return 8;
+                if (width >= 1024) return 6;
+                if (width >= 768) return 5;
+                if (width >= 640) return 4;
+                return 2;
+            }
+            return 1;
+        }
 
         function formatDriveImageUrl(url) {
             if (!url) return '';
@@ -286,11 +318,10 @@
                 if (!response.ok) throw new Error('Network error');
                 const data = await response.text();
                 const rows = data.split('\n');
-                // เพิ่ม index ใน .map เพื่อเก็บข้อมูลว่าอยู่บรรทัดที่เท่าไหร่
                 allGames = rows.slice(1).map((row, index) => {
                     const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     return {
-                        originalIndex: index, // บันทึกลำดับเดิมจาก Google Sheet เพื่อใช้เรียงเกมใหม่สุด
+                        originalIndex: index,
                         name: cols[2]?.replace(/"/g, '').trim(),
                         img: formatDriveImageUrl(cols[3]),
                         type: cols[4]?.replace(/"/g, '').trim() || '', 
@@ -303,14 +334,11 @@
                     };
                 }).filter(game => game.name);
                 
-                // สั่งให้ทำการจัดเรียง (Apply Filters) ทันทีที่โหลดเสร็จ
                 applyFilters();
                 document.getElementById('loading').style.display = 'none';
             } catch (error) {
                 document.getElementById('loading').style.display = 'none';
-                // ถ้าเปิดไม่ติดให้ใช้ข้อมูลสำรองและจัดเรียง A-Z เช่นกัน
-                allGames = mockData.map((game, index) => ({...game, originalIndex: index}));
-                applyFilters();
+                renderPaginated();
             }
         }
 
@@ -324,28 +352,26 @@
             currentCardSize = size;
             document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`btn-${size}`).classList.add('active');
+            currentPage = 1; // เมื่อเปลี่ยนขนาดให้กลับไปหน้าแรก เพื่อให้จัดแถวได้เต็ม 10 แถวเสมอ
             renderPaginated();
         }
 
         function applyFilters() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const statusTerm = document.getElementById('statusFilter').value;
-            const sortTerm = document.getElementById('sortFilter').value; // ดึงค่ารูปแบบการเรียงลำดับ
+            const sortTerm = document.getElementById('sortFilter').value;
             
-            // 1. กรองข้อมูลก่อน (ค้นหาและสถานะ)
             filteredGames = allGames.filter(g => {
                 const matchSearch = g.name.toLowerCase().includes(searchTerm);
                 const matchStatus = statusTerm === 'all' || (g.status || '').trim() === statusTerm;
                 return matchSearch && matchStatus;
             });
 
-            // 2. จับมาเรียงลำดับตามตัวเลือก
             if (sortTerm === 'az') {
                 filteredGames.sort((a, b) => a.name.localeCompare(b.name, 'th'));
             } else if (sortTerm === 'za') {
                 filteredGames.sort((a, b) => b.name.localeCompare(a.name, 'th'));
             } else if (sortTerm === 'newest') {
-                // เรียงจาก index มากไปน้อย (เกมที่กรอกล่าสุดอยู่บนสุด)
                 filteredGames.sort((a, b) => b.originalIndex - a.originalIndex);
             }
             
@@ -383,8 +409,14 @@
             }
             noResults.classList.add('hidden');
 
-            const totalPages = Math.ceil(filteredGames.length / ITEMS_PER_PAGE);
-            let gamesToShow = isShowAll ? filteredGames : filteredGames.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+            // คำนวณจำนวนหน้าแบบไดนามิก (10 แถว * จำนวนคอลัมน์)
+            const currentColumns = getColumnsCount();
+            const itemsPerPage = currentColumns * 10; 
+            
+            const totalPages = Math.ceil(filteredGames.length / itemsPerPage);
+            if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+
+            let gamesToShow = isShowAll ? filteredGames : filteredGames.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
             let gridClasses = "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5";
             if (currentCardSize === 'small') gridClasses = "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6";
@@ -397,7 +429,6 @@
                 const isAvailable = statusStr === 'ว่าง';
                 const finalLink = `${CONTACT_LINK}?text=${encodeURIComponent('สนใจเช่า: ' + game.name)}`;
                 
-                // จัดการราคา ถ้าเป็น 0 หรือว่าง ให้เป็น -
                 const displayPrice = (!game.price || game.price === '0' || game.price.trim() === '-') ? '-' : game.price + '.-';
                 const displayDeposit = (!game.deposit || game.deposit === '0' || game.deposit.trim() === '-') ? '-' : game.deposit + '.-';
 
@@ -409,7 +440,7 @@
                 let btnTextSize = "text-[18px]";
                 let btnPadding = "py-4";
                 let gapBetweenSections = "mb-5";
-                let rentLabel = "ค่าเช่า/วัน"; // กำหนดค่าเริ่มต้นสำหรับขนาดมาตรฐาน
+                let rentLabel = "ค่าเช่า/วัน"; 
 
                 if (currentCardSize === 'small') {
                     logoSize = "h-8";
@@ -420,7 +451,7 @@
                     btnTextSize = "text-[16px]";
                     btnPadding = "py-3.5";
                     gapBetweenSections = "mb-4";
-                    rentLabel = "เช่า/วัน"; // ปรับคำให้สั้นลงสำหรับขนาดเล็ก
+                    rentLabel = "เช่า/วัน"; 
                 } else if (currentCardSize === 'compact') {
                     logoSize = "h-6";
                     padding = "p-4"; 
@@ -430,10 +461,9 @@
                     btnTextSize = "text-[14px]";
                     btnPadding = "py-3";
                     gapBetweenSections = "mb-3";
-                    rentLabel = "เช่า/วัน"; // ปรับคำให้สั้นลงสำหรับขนาดจิ๋ว
+                    rentLabel = "เช่า/วัน"; 
                 }
 
-                // จัดการแสดงผล เวอร์ชั่น และ คู่มือ
                 let gameInfoDisplay = '';
                 if (currentCardSize === 'normal') {
                     gameInfoDisplay = `เวอร์ชั่น: ${game.lang} | คู่มือ: ${game.manual}`;
@@ -444,7 +474,6 @@
                 let typeDisplay = '';
                 if (game.type && game.type.toLowerCase().startsWith('http')) {
                     if (gameLogoUrl) {
-                        // เพิ่ม duration-300 และ active:scale-95 ให้ BGG Pop เด้งสมูทเท่ากันกับปุ่มสถานะ
                         typeDisplay = `<a href="${game.type}" target="_blank" class="transition-all duration-300 hover:scale-105 active:scale-95 inline-block"><img src="${gameLogoUrl}" class="${logoSize} object-contain opacity-90 hover:opacity-100 transition-opacity" alt="BGG"></a>`;
                     } else {
                         typeDisplay = `<a href="${game.type}" target="_blank" class="${infoTextSize} text-zinc-500 hover:text-white underline truncate max-w-[100px] inline-block font-bold">BGG</a>`;
@@ -453,7 +482,6 @@
 
                 let buttonStyles = '';
                 if (statusStr === 'ว่าง') {
-                    // ปรับ Effect hover/active ให้ตรงกัน
                     buttonStyles = 'bg-green-500 text-black hover:bg-green-400 shadow-lg shadow-green-500/20 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer';
                 } else if (statusStr === 'ติดเช่า') {
                     buttonStyles = 'bg-red-600 text-white cursor-not-allowed pointer-events-none opacity-90 shadow-lg shadow-red-900/20';
@@ -477,12 +505,10 @@
                                 ${typeDisplay}
                             </div>
                         </div>
-                        <!-- แก้ไขให้ใช้ line-clamp-2 เพียวๆ เพื่อไม่ให้มีขอบบรรทัดที่ 3 โผล่มา -->
                         <h3 class="${titleSize} font-bold ${gapBetweenSections} line-clamp-2 overflow-hidden text-zinc-100">${game.name}</h3>
                         
                         <div class="mt-auto">
                             <div class="grid grid-cols-2 gap-2 mb-4">
-                                <!-- เรียกใช้ตัวแปร rentLabel แทนข้อความตายตัว -->
                                 <div class="${priceBoxPadding} rounded-xl bg-white/5 border border-white/5"><p class="${infoTextSize} text-zinc-500 uppercase mb-1 tracking-widest">${rentLabel}</p><p class="${titleSize} font-bold text-white">${displayPrice}</p></div>
                                 <div class="${priceBoxPadding} rounded-xl bg-white/5 border border-white/5"><p class="${infoTextSize} text-zinc-500 uppercase mb-1 tracking-widest">มัดจำ</p><p class="${titleSize} font-bold text-white">${displayDeposit}</p></div>
                             </div>
@@ -496,7 +522,7 @@
             }).join('');
             lucide.createIcons();
 
-            if (filteredGames.length > ITEMS_PER_PAGE) {
+            if (filteredGames.length > itemsPerPage) {
                 if (isShowAll) {
                     paginationContainer.innerHTML = `
                         <button onclick="toggleShowAll()" class="px-8 py-4 rounded-2xl bg-white/10 border border-white/20 text-white font-bold tracking-widest uppercase text-sm transition-all hover:bg-white/20 flex items-center shadow-lg">
@@ -527,7 +553,7 @@
 
         document.getElementById('searchInput').addEventListener('input', applyFilters);
         document.getElementById('statusFilter').addEventListener('change', applyFilters);
-        document.getElementById('sortFilter').addEventListener('change', applyFilters); // สั่งอัปเดตเมื่อเปลี่ยนการจัดเรียง
+        document.getElementById('sortFilter').addEventListener('change', applyFilters);
         window.onload = init;
     </script>
 </body>

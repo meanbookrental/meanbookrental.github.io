@@ -217,24 +217,40 @@
     </div>
 
     <script>
+        // URL สำหรับตรวจสอบการ Login (อันเดิม)
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwoET1BxgdnCu8YcY0B3X11qtLnl1d7xCaB60Kd2_T32aV0P_VvJ-WDXTJ98WNmK7brRw/exec';
         
-        // ฟังก์ชันดึงข้อมูล Favicon - เลียนแบบ index.html เป๊ะๆ
+        // ลิงก์สำหรับดึงข้อมูล Favicon (แปลงท้ายลิงก์เป็นแบบ CSV เพื่อให้โค้ดของคุณเมอ่านค่าได้)
+        const ASSETS_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSboMt8lu6Md3_4KGIZ3QoBCeCO-3RGCg0TVnD4B-zy4TOjQrFExssmO34xciDHLCFUCBhQC3Wixto3/pub?gid=283486066&single=true&output=csv';
+
+        // ฟังก์ชันช่วยแปลง URL รูปภาพ Google Drive ให้แสดงผลได้
+        function formatDriveImageUrl(url) {
+            if (!url) return '';
+            const fileIdMatch = url.match(/[-\w]{25,}/);
+            return fileIdMatch ? `https://lh3.googleusercontent.com/d/${fileIdMatch[0]}` : url;
+        }
+
+        // ฟังก์ชันดึงข้อมูลแบบเดียวกับหน้าหลัก
         async function init() {
             try {
-                // ตัด options method/mode ออกเพื่อให้เหมือนหน้าหลักที่ทำงานได้ปกติ
-                const response = await fetch(WEB_APP_URL);
-                if (!response.ok) throw new Error('Network response was not ok');
-                
-                const data = await response.json();
-                
-                // ดึงข้อมูลจาก Index เดียวกับหน้าหลัก (B3 คือ Website[2][1])
-                if (data.website && data.website[2] && data.website[2][1]) {
-                    const faviconUrl = data.website[2][1];
-                    document.getElementById('dynamic-favicon').href = faviconUrl;
+                const assetResponse = await fetch(ASSETS_SHEET_URL);
+                if (assetResponse.ok) {
+                    const assetData = await assetResponse.text();
+                    const assetRows = assetData.split('\n');
+                    assetRows.forEach(row => {
+                        // แยกข้อมูลตามคอลัมน์แบบ CSV
+                        const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                        const key = cols[0]?.replace(/"/g, '').trim();
+                        const value = cols[1]?.replace(/"/g, '').trim();
+                        
+                        // ถ้าเจอคำว่า Favicon ให้เอาลิงก์ไปใส่
+                        if (key === 'Favicon') {
+                            document.getElementById('dynamic-favicon').href = formatDriveImageUrl(value);
+                        }
+                    });
                 }
-            } catch (error) {
-                console.warn('Favicon could not be loaded dynamically:', error.message);
+            } catch (e) {
+                console.warn('ไม่สามารถดึงข้อมูล Favicon ได้:', e);
             }
         }
 

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เข้าสู่ระบบ | MEANBOOK Rental</title>
     
-    <!-- Favicon Tag -->
+    <!-- Favicon Tag - จะถูกเติมโดย JavaScript อัตโนมัติ -->
     <link id="dynamic-favicon" rel="icon" href="">
     
     <!-- Google Fonts: Inter & Kanit -->
@@ -90,7 +90,7 @@
             outline: none;
         }
 
-        /* Fix Autofill issues */
+        /* แก้ปัญหาแถบทึบเวลา Autofill */
         .input-field:-webkit-autofill,
         .input-field:-webkit-autofill:hover, 
         .input-field:-webkit-autofill:focus {
@@ -100,7 +100,6 @@
             caret-color: white;
         }
 
-        /* Placeholder color */
         .input-field::placeholder {
             color: rgba(255, 255, 255, 0.15);
             font-weight: 300;
@@ -117,11 +116,7 @@
             transform: translateY(-1px);
             box-shadow: 0 8px 20px rgba(255,255,255,0.1);
         }
-        .btn-action:active {
-            transform: translateY(0);
-        }
-
-        /* Loading Spinner */
+        
         .loader {
             border: 2px solid rgba(0,0,0,0.1);
             border-top: 2px solid #000000;
@@ -133,21 +128,18 @@
             margin-right: 8px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
         .hidden { display: none; }
     </style>
 </head>
 <body>
     <div class="bg-glow"></div>
 
-    <!-- ปุ่มกลับหน้าหลัก -->
     <a href="https://meanbookrental.github.io/" class="back-home group">
         <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1"></i>
         <span>กลับหน้าหลัก</span>
     </a>
 
     <div class="w-full max-w-[420px] px-6 py-12">
-        <!-- Logo Area -->
         <div class="text-center mb-10">
             <h1 class="text-3xl font-bold text-white tracking-tight">
                 MEANBOOK <span class="text-white font-light">Rental</span>
@@ -155,7 +147,6 @@
             <p class="text-white/50 text-sm mt-2 font-light tracking-wide">บริการเช่าบอร์ดเกมออนไลน์</p>
         </div>
 
-        <!-- Login Card -->
         <div class="glass-card rounded-[32px] p-10">
             <h2 class="text-lg font-medium mb-8 text-white flex items-center">
                 <i data-lucide="user-circle" class="w-5 h-5 mr-3 text-white"></i>
@@ -163,7 +154,6 @@
             </h2>
 
             <form id="loginForm" class="space-y-6">
-                <!-- Email -->
                 <div class="space-y-1.5">
                     <label class="text-[10px] uppercase tracking-[0.2em] text-white font-bold ml-1">Email Address</label>
                     <div class="relative">
@@ -175,7 +165,6 @@
                     </div>
                 </div>
 
-                <!-- Password -->
                 <div class="space-y-1.5">
                     <label class="text-[10px] uppercase tracking-[0.2em] text-white font-bold ml-1">Password</label>
                     <div class="relative">
@@ -190,7 +179,6 @@
                     </div>
                 </div>
 
-                <!-- Action Button -->
                 <div class="pt-4">
                     <button type="submit" id="submitBtn" class="btn-action w-full py-4 rounded-2xl flex items-center justify-center text-sm uppercase tracking-widest">
                         Sign In
@@ -198,7 +186,6 @@
                 </div>
             </form>
 
-            <!-- Footer Links -->
             <div class="mt-8 text-center text-sm">
                 <span class="text-white/30 font-light">ยังไม่มีบัญชีสมาชิก?</span>
                 <a href="https://forms.gle/D8f9yE8xoWKVyQP87" target="_blank" class="text-white/70 hover:text-white font-medium ml-1 transition-colors underline-offset-4 hover:underline">
@@ -207,7 +194,6 @@
             </div>
         </div>
 
-        <!-- Notification Message Box -->
         <div id="msgBox" class="mt-6 p-5 rounded-[24px] hidden items-start space-x-4 border backdrop-blur-md transition-all duration-500 transform scale-95 opacity-0">
             <div id="msgIcon" class="mt-1"></div>
             <div>
@@ -218,10 +204,22 @@
     </div>
 
     <script>
-        lucide.createIcons();
-
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwoET1BxgdnCu8YcY0B3X11qtLnl1d7xCaB60Kd2_T32aV0P_VvJ-WDXTJ98WNmK7brRw/exec';
-        
+
+        // ฟังก์ชันดึง Favicon อัตโนมัติจาก Sheet
+        async function initFavicon() {
+            try {
+                // เรียก Web App พร้อม action เพื่อดึงข้อมูลเว็บ (รวมถึง Favicon จากช่อง B3)
+                const response = await fetch(`${WEB_APP_URL}?action=getWebsiteData`);
+                const data = await response.json();
+                if (data && data.favicon) {
+                    document.getElementById('dynamic-favicon').href = data.favicon;
+                }
+            } catch (err) {
+                console.warn('Cannot load dynamic favicon:', err);
+            }
+        }
+
         function togglePassword() {
             const pwd = document.getElementById('password');
             const icon = document.getElementById('eyeIcon');
@@ -240,9 +238,7 @@
             const msgTitle = document.getElementById('msgTitle');
             const msgText = document.getElementById('msgText');
             const msgIcon = document.getElementById('msgIcon');
-
             msgBox.className = 'mt-6 p-5 rounded-[24px] flex items-start space-x-4 border backdrop-blur-md transition-all duration-300 transform scale-100 opacity-100';
-            
             if (status === 'success') {
                 msgBox.classList.add('bg-emerald-500/10', 'text-emerald-400', 'border-emerald-500/20');
                 msgIcon.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5"></i>';
@@ -253,7 +249,6 @@
                 msgBox.classList.add('bg-rose-500/10', 'text-rose-400', 'border-rose-500/20');
                 msgIcon.innerHTML = '<i data-lucide="alert-circle" class="w-5 h-5"></i>';
             }
-
             msgTitle.innerText = title;
             msgText.innerText = text;
             lucide.createIcons();
@@ -264,20 +259,14 @@
             const btn = document.getElementById('submitBtn');
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-
             btn.disabled = true;
             btn.innerHTML = '<span class="loader"></span> ตรวจสอบข้อมูล...';
             document.getElementById('msgBox').classList.add('hidden');
-
             try {
                 const response = await fetch(`${WEB_APP_URL}?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`);
                 const result = await response.json();
-
                 if (result.status === 'success') {
-                    localStorage.setItem('meanbook_user', JSON.stringify({
-                        name: result.name || 'Member',
-                        address: result.address || '-'
-                    }));
+                    localStorage.setItem('meanbook_user', JSON.stringify({ name: result.name || 'Member', address: result.address || '-' }));
                     showMessage('success', 'ยินดีต้อนรับครับ', `คุณ ${result.name} เข้าสู่ระบบสำเร็จ ระบบกำลังนำท่านกลับหน้าหลัก...`);
                     setTimeout(() => window.location.href = 'https://meanbookrental.github.io/', 2000);
                 } else if (result.status === 'pending') {
@@ -292,6 +281,12 @@
                 btn.innerHTML = 'Sign In';
             }
         });
+
+        // โหลดข้อมูลเมื่อเปิดหน้าเว็บ
+        window.onload = () => {
+            lucide.createIcons();
+            initFavicon(); // ดึง Favicon แบบออโต้
+        };
     </script>
 </body>
 </html>

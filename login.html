@@ -44,6 +44,33 @@
             right: -15vw;
         }
 
+        /* Back to Home Button */
+        .back-home {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+        }
+        .back-home:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            transform: translateX(-4px);
+        }
+
         .glass-card {
             background: var(--glass);
             backdrop-filter: blur(24px);
@@ -113,19 +140,23 @@
 <body>
     <div class="bg-glow"></div>
 
+    <!-- ปุ่มกลับหน้าหลัก -->
+    <a href="https://meanbookrental.github.io/" class="back-home group">
+        <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1"></i>
+        <span>กลับหน้าหลัก</span>
+    </a>
+
     <div class="w-full max-w-[420px] px-6 py-12">
         <!-- Logo Area -->
         <div class="text-center mb-10">
             <h1 class="text-3xl font-bold text-white tracking-tight">
                 MEANBOOK <span class="text-white font-light">Rental</span>
             </h1>
-            <!-- ปรับเป็นสีเทาสว่าง (text-white/50) ให้เด่นขึ้นตามคำขอครับ -->
             <p class="text-white/50 text-sm mt-2 font-light tracking-wide">บริการเช่าบอร์ดเกมออนไลน์</p>
         </div>
 
         <!-- Login Card -->
         <div class="glass-card rounded-[32px] p-10">
-            <!-- เช็คและปรับเป็นสีขาว (text-white) เรียบร้อยครับ -->
             <h2 class="text-lg font-medium mb-8 text-white flex items-center">
                 <i data-lucide="user-circle" class="w-5 h-5 mr-3 text-white"></i>
                 เข้าสู่ระบบสมาชิก

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เข้าสู่ระบบ | MEANBOOK Rental</title>
     
-    <!-- Favicon Tag - จะถูกเติมโดย JavaScript อัตโนมัติ -->
+    <!-- Favicon Tag - ปรับให้รองรับการดึงข้อมูลแบบ Dynamic -->
     <link id="dynamic-favicon" rel="icon" href="">
     
     <!-- Google Fonts: Inter & Kanit -->
@@ -90,16 +90,17 @@
             outline: none;
         }
 
-        /* แก้ปัญหาแถบทึบเวลา Autofill */
+        /* Fix Autofill issues */
         .input-field:-webkit-autofill,
         .input-field:-webkit-autofill:hover, 
         .input-field:-webkit-autofill:focus {
-            -webkit-text-fill-color: white;
-            -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.04) inset;
+            -webkit-text-fill-color: white !important;
+            -webkit-box-shadow: 0 0 0px 1000px rgba(10, 10, 10, 0.95) inset !important;
             transition: background-color 5000s ease-in-out 0s;
             caret-color: white;
         }
 
+        /* Placeholder color */
         .input-field::placeholder {
             color: rgba(255, 255, 255, 0.15);
             font-weight: 300;
@@ -116,7 +117,9 @@
             transform: translateY(-1px);
             box-shadow: 0 8px 20px rgba(255,255,255,0.1);
         }
-        
+        .btn-action:active { transform: translateY(0); }
+
+        /* Loading Spinner */
         .loader {
             border: 2px solid rgba(0,0,0,0.1);
             border-top: 2px solid #000000;
@@ -128,18 +131,21 @@
             margin-right: 8px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
         .hidden { display: none; }
     </style>
 </head>
 <body>
     <div class="bg-glow"></div>
 
+    <!-- ปุ่มกลับหน้าหลัก -->
     <a href="https://meanbookrental.github.io/" class="back-home group">
-        <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1"></i>
+        <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1 text-white"></i>
         <span>กลับหน้าหลัก</span>
     </a>
 
     <div class="w-full max-w-[420px] px-6 py-12">
+        <!-- Logo Area -->
         <div class="text-center mb-10">
             <h1 class="text-3xl font-bold text-white tracking-tight">
                 MEANBOOK <span class="text-white font-light">Rental</span>
@@ -147,6 +153,7 @@
             <p class="text-white/50 text-sm mt-2 font-light tracking-wide">บริการเช่าบอร์ดเกมออนไลน์</p>
         </div>
 
+        <!-- Login Card -->
         <div class="glass-card rounded-[32px] p-10">
             <h2 class="text-lg font-medium mb-8 text-white flex items-center">
                 <i data-lucide="user-circle" class="w-5 h-5 mr-3 text-white"></i>
@@ -154,6 +161,7 @@
             </h2>
 
             <form id="loginForm" class="space-y-6">
+                <!-- Email -->
                 <div class="space-y-1.5">
                     <label class="text-[10px] uppercase tracking-[0.2em] text-white font-bold ml-1">Email Address</label>
                     <div class="relative">
@@ -165,6 +173,7 @@
                     </div>
                 </div>
 
+                <!-- Password -->
                 <div class="space-y-1.5">
                     <label class="text-[10px] uppercase tracking-[0.2em] text-white font-bold ml-1">Password</label>
                     <div class="relative">
@@ -179,6 +188,7 @@
                     </div>
                 </div>
 
+                <!-- Action Button -->
                 <div class="pt-4">
                     <button type="submit" id="submitBtn" class="btn-action w-full py-4 rounded-2xl flex items-center justify-center text-sm uppercase tracking-widest">
                         Sign In
@@ -186,6 +196,7 @@
                 </div>
             </form>
 
+            <!-- Footer Links -->
             <div class="mt-8 text-center text-sm">
                 <span class="text-white/30 font-light">ยังไม่มีบัญชีสมาชิก?</span>
                 <a href="https://forms.gle/D8f9yE8xoWKVyQP87" target="_blank" class="text-white/70 hover:text-white font-medium ml-1 transition-colors underline-offset-4 hover:underline">
@@ -194,6 +205,7 @@
             </div>
         </div>
 
+        <!-- Notification Message Box -->
         <div id="msgBox" class="mt-6 p-5 rounded-[24px] hidden items-start space-x-4 border backdrop-blur-md transition-all duration-500 transform scale-95 opacity-0">
             <div id="msgIcon" class="mt-1"></div>
             <div>
@@ -205,18 +217,29 @@
 
     <script>
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwoET1BxgdnCu8YcY0B3X11qtLnl1d7xCaB60Kd2_T32aV0P_VvJ-WDXTJ98WNmK7brRw/exec';
-
-        // ฟังก์ชันดึง Favicon อัตโนมัติจาก Sheet
-        async function initFavicon() {
+        
+        // ฟังก์ชันดึงข้อมูล Favicon ให้เหมือนหน้าหลักเป๊ะๆ
+        async function init() {
             try {
-                // เรียก Web App พร้อม action เพื่อดึงข้อมูลเว็บ (รวมถึง Favicon จากช่อง B3)
-                const response = await fetch(`${WEB_APP_URL}?action=getWebsiteData`);
+                // เรียกใช้ fetch แบบระบุรายละเอียดเพื่อป้องกัน Error ที่ส่งผลกระทบต่อหน้าเว็บ
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                if (!response.ok) throw new Error('Network response was not ok');
+                
                 const data = await response.json();
-                if (data && data.favicon) {
-                    document.getElementById('dynamic-favicon').href = data.favicon;
+                
+                // อ้างอิง Index เดียวกับ index.html: แถวที่ 2 คอลัมน์ที่ 1 (ช่อง B3 ในแท็บ Website)
+                if (data.website && data.website[2] && data.website[2][1]) {
+                    const faviconUrl = data.website[2][1];
+                    document.getElementById('dynamic-favicon').href = faviconUrl;
                 }
-            } catch (err) {
-                console.warn('Cannot load dynamic favicon:', err);
+            } catch (error) {
+                // หากเกิดข้อผิดพลาดในการดึง Favicon ให้แสดงใน Log อย่างเงียบๆ 
+                // ไม่ต้องแสดง Error ใหญ่โตหน้าเว็บเพื่อให้ลูกค้าใช้งาน Login ได้ปกติครับ
+                console.warn('Favicon could not be loaded dynamically:', error.message);
             }
         }
 
@@ -282,10 +305,9 @@
             }
         });
 
-        // โหลดข้อมูลเมื่อเปิดหน้าเว็บ
         window.onload = () => {
+            init(); 
             lucide.createIcons();
-            initFavicon(); // ดึง Favicon แบบออโต้
         };
     </script>
 </body>

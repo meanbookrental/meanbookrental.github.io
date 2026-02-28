@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เข้าสู่ระบบ | MEANBOOK Rental</title>
+    <!-- Google Fonts: Inter & Kanit -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --accent: #ffffff;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+        body {
+            font-family: 'Inter', 'Kanit', sans-serif;
+            background-color: var(--bg-dark);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        /* Background Decoration */
+        .bg-glow {
+            position: fixed;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, rgba(255,255,255,0.035) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 50%;
+            z-index: -1;
+            top: -15vw;
+            right: -15vw;
+        }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        
+        .input-field {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.2);
+            outline: none;
+        }
+
+        /* แก้ไขปัญหา Autofill แถบทึบ (Chrome/Edge/Safari) */
+        .input-field:-webkit-autofill,
+        .input-field:-webkit-autofill:hover, 
+        .input-field:-webkit-autofill:focus {
+            -webkit-text-fill-color: white;
+            -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.04) inset;
+            transition: background-color 5000s ease-in-out 0s;
+            caret-color: white;
+        }
+
+        /* Placeholder color */
+        .input-field::placeholder {
+            color: rgba(255, 255, 255, 0.15);
+            font-weight: 300;
+        }
+
+        .btn-action {
+            background: #ffffff;
+            color: #000000;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-action:hover {
+            background: #f0f0f0;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(255,255,255,0.1);
+        }
+        .btn-action:active {
+            transform: translateY(0);
+        }
+
+        /* Loading Spinner */
+        .loader {
+            border: 2px solid rgba(0,0,0,0.1);
+            border-top: 2px solid #000000;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+
+    <div class="w-full max-w-[420px] px-6 py-12">
+        <!-- Logo Area -->
+        <div class="text-center mb-10">
+            <h1 class="text-3xl font-bold text-white tracking-tight">
+                MEANBOOK <span class="text-white font-light">Rental</span>
+            </h1>
+            <p class="text-white/30 text-sm mt-2 font-light tracking-wide">บริการเช่าบอร์ดเกมออนไลน์</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="glass-card rounded-[32px] p-10">
+            <h2 class="text-lg font-medium mb-8 text-white/80 flex items-center">
+                <i data-lucide="user-circle" class="w-5 h-5 mr-3 text-white"></i>
+                เข้าสู่ระบบสมาชิก
+            </h2>
+
+            <form id="loginForm" class="space-y-6">
+                <!-- Email -->
+                <div class="space-y-1.5">
+                    <label class="text-[10px] uppercase tracking-[0.2em] text-white font-bold ml-1">Email Address</label>
+                    <div class="relative">
+                        <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white"></i>
+                        <input type="email" id="email" required
+                            class="input-field w-full pl-12 pr-4 py-4 rounded-2xl text-sm"
+                            placeholder="Email"
+                            autocomplete="email">
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="space-y-1.5">
+                    <label class="text-[10px] uppercase tracking-[0.2em] text-white font-bold ml-1">Password</label>
+                    <div class="relative">
+                        <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white"></i>
+                        <input type="password" id="password" required
+                            class="input-field w-full pl-12 pr-12 py-4 rounded-2xl text-sm"
+                            placeholder="Password"
+                            autocomplete="current-password">
+                        <button type="button" onclick="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-white/70 transition-colors">
+                            <i id="eyeIcon" data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="pt-4">
+                    <button type="submit" id="submitBtn" class="btn-action w-full py-4 rounded-2xl flex items-center justify-center text-sm uppercase tracking-widest">
+                        Sign In
+                    </button>
+                </div>
+            </form>
+
+            <!-- Footer Links -->
+            <div class="mt-8 text-center text-sm">
+                <span class="text-white/30 font-light">ยังไม่มีบัญชีสมาชิก?</span>
+                <a href="https://forms.gle/D8f9yE8xoWKVyQP87" target="_blank" class="text-white/70 hover:text-white font-medium ml-1 transition-colors underline-offset-4 hover:underline">
+                    สมัครสมาชิก
+                </a>
+            </div>
+        </div>
+
+        <!-- Notification Message Box -->
+        <div id="msgBox" class="mt-6 p-5 rounded-[24px] hidden items-start space-x-4 border backdrop-blur-md transition-all duration-500 transform scale-95 opacity-0">
+            <div id="msgIcon" class="mt-1"></div>
+            <div>
+                <p id="msgTitle" class="font-bold text-sm tracking-wide"></p>
+                <p id="msgText" class="text-xs mt-1 text-white/60 leading-relaxed"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwoET1BxgdnCu8YcY0B3X11qtLnl1d7xCaB60Kd2_T32aV0P_VvJ-WDXTJ98WNmK7brRw/exec';
+        
+        function togglePassword() {
+            const pwd = document.getElementById('password');
+            const icon = document.getElementById('eyeIcon');
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                icon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                pwd.type = 'password';
+                icon.setAttribute('data-lucide', 'eye');
+            }
+            lucide.createIcons();
+        }
+
+        function showMessage(status, title, text) {
+            const msgBox = document.getElementById('msgBox');
+            const msgTitle = document.getElementById('msgTitle');
+            const msgText = document.getElementById('msgText');
+            const msgIcon = document.getElementById('msgIcon');
+
+            msgBox.className = 'mt-6 p-5 rounded-[24px] flex items-start space-x-4 border backdrop-blur-md transition-all duration-300 transform scale-100 opacity-100';
+            
+            if (status === 'success') {
+                msgBox.classList.add('bg-emerald-500/10', 'text-emerald-400', 'border-emerald-500/20');
+                msgIcon.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5"></i>';
+            } else if (status === 'pending') {
+                msgBox.classList.add('bg-amber-500/10', 'text-amber-400', 'border-amber-500/20');
+                msgIcon.innerHTML = '<i data-lucide="clock" class="w-5 h-5"></i>';
+            } else {
+                msgBox.classList.add('bg-rose-500/10', 'text-rose-400', 'border-rose-500/20');
+                msgIcon.innerHTML = '<i data-lucide="alert-circle" class="w-5 h-5"></i>';
+            }
+
+            msgTitle.innerText = title;
+            msgText.innerText = text;
+            lucide.createIcons();
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loader"></span> ตรวจสอบข้อมูล...';
+            document.getElementById('msgBox').classList.add('hidden');
+
+            try {
+                const response = await fetch(`${WEB_APP_URL}?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`);
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    localStorage.setItem('meanbook_user', JSON.stringify({
+                        name: result.name || 'Member',
+                        address: result.address || '-'
+                    }));
+                    showMessage('success', 'ยินดีต้อนรับครับ', `คุณ ${result.name} เข้าสู่ระบบสำเร็จ ระบบกำลังนำท่านกลับหน้าหลัก...`);
+                    setTimeout(() => window.location.href = 'https://meanbookrental.github.io/', 2000);
+                } else if (result.status === 'pending') {
+                    showMessage('pending', 'อยู่ระหว่างรออนุมัติ', 'บัญชีสมาชิกของคุณอยู่ระหว่างการรออนุมัติจากเจ้าหน้าที่ครับ');
+                } else {
+                    showMessage('fail', 'ข้อมูลไม่ถูกต้อง', 'อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง');
+                }
+            } catch (err) {
+                showMessage('fail', 'เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ในขณะนี้');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Sign In';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -286,26 +286,42 @@
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
             
             btn.disabled = true;
             btn.innerHTML = '<span class="loader"></span> ตรวจสอบข้อมูล...';
             document.getElementById('msgBox').classList.add('hidden');
             
             try {
-                const response = await fetch(`${WEB_APP_URL}?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`);
+                // ส่งข้อมูลด้วย POST และแนบเป็น String ใน body เพิ่อให้สคริปต์หน้าบ้านรับแบบ doPost(e) ได้อย่างถูกต้อง
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8'
+                    },
+                    body: JSON.stringify({ 
+                        email: email, 
+                        password: password 
+                    })
+                });
+                
                 const result = await response.json();
                 
+                // ตรวจสอบสถานะตามเงื่อนไขที่ผู้ใช้ระบุ
                 if (result.status === 'success') {
                     localStorage.setItem('meanbook_user', JSON.stringify({ name: result.name || 'Member', address: result.address || '-' }));
+                    // ตัดคำว่า "ครับ" และชื่อของผู้ใช้ออก
                     showMessage('success', 'ยินดีต้อนรับ', 'เข้าสู่ระบบสำเร็จ ระบบกำลังนำท่านกลับหน้าหลัก...');
                     setTimeout(() => window.location.href = 'https://meanbookrental.github.io/', 2000);
                 } else if (result.status === 'pending') {
+                    // ตัดคำว่า "ครับ" ออก
                     showMessage('pending', 'อยู่ระหว่างรออนุมัติ', 'บัญชีสมาชิกของคุณอยู่ระหว่างการรออนุมัติจากเจ้าหน้าที่');
                 } else if (result.status === 'disabled') {
+                    // ดึงข้อความจาก data.message
                     showMessage('fail', 'บัญชีถูกระงับ', result.message || 'บัญชีนี้ถูกยกเลิกการใช้งาน กรุณาติดต่อแอดมิน');
                 } else {
+                    // ดึงข้อความจาก data.message สำหรับสถานะอื่นๆ ที่นอกเหนือจากด้านบน
                     showMessage('fail', 'ข้อมูลไม่ถูกต้อง', result.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง');
                 }
             } catch (err) {

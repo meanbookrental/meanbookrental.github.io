@@ -129,14 +129,16 @@
                 </div>
             </div>
 
-            <!-- ส่วนด้านขวา: ปุ่ม Line OA & Login -->
+            <!-- ส่วนด้านขวา: ปุ่ม Line OA & Auth Container -->
             <div class="flex items-center gap-2 sm:gap-3">
                 <a href="https://line.me/ti/p/@meanbook" target="_blank" class="bg-white/5 hover:bg-white/10 text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest border border-white/10 flex items-center gap-1.5 sm:gap-2 transition-all">
                     <i data-lucide="message-circle" class="w-3 h-3 text-green-400"></i> Line OA
                 </a>
-                <a href="login.html" class="bg-white/5 hover:bg-white/10 text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest border border-white/10 flex items-center gap-1.5 sm:gap-2 transition-all">
-                    <i data-lucide="user" class="w-3 h-3"></i> Login
-                </a>
+                
+                <!-- พื้นที่สำหรับปุ่ม Login หรือ โปรไฟล์สมาชิก (จะถูกควบคุมด้วย JavaScript) -->
+                <div id="authContainer" class="flex items-center gap-2 sm:gap-3">
+                    <!-- โหลดสถานะเริ่มต้น -->
+                </div>
             </div>
         </div>
     </nav>
@@ -625,8 +627,43 @@
         document.getElementById('statusFilter').addEventListener('change', applyFilters);
         document.getElementById('sortFilter').addEventListener('change', applyFilters);
         
-        // แก้ไขให้โหลดไอคอน Lucide ทันทีตั้งแต่เริ่มต้นเว็บ
+        // ระบบเช็กสถานะการล็อกอิน
+        function checkLoginStatus() {
+            const authContainer = document.getElementById('authContainer');
+            // สำคัญ: ดึงค่าจาก localStorage (หากตอนหน้า login.html คุณเมตั้งชื่อตัวแปรอื่น ให้แก้ 'memberName' ให้ตรงกันครับ)
+            const memberName = localStorage.getItem('memberName'); 
+            
+            if (memberName) {
+                // กรณี: ตรวจพบว่าล็อกอินแล้ว
+                authContainer.innerHTML = `
+                    <div class="flex items-center gap-2 bg-white/5 border border-white/10 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl cursor-default">
+                        <i data-lucide="user-check" class="w-3 h-3 sm:w-4 sm:h-4 text-green-400"></i>
+                        <span class="text-[10px] sm:text-xs font-bold tracking-wide text-white truncate max-w-[80px] sm:max-w-[150px]">คุณ ${memberName}</span>
+                    </div>
+                    <button onclick="logout()" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest border border-red-500/20 flex items-center gap-1.5 transition-all shadow-lg">
+                        <i data-lucide="log-out" class="w-3 h-3"></i> <span class="hidden sm:inline">Logout</span>
+                    </button>
+                `;
+            } else {
+                // กรณี: ยังไม่ได้ล็อกอิน
+                authContainer.innerHTML = `
+                    <a href="login.html" class="bg-white/5 hover:bg-white/10 text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest border border-white/10 flex items-center gap-1.5 sm:gap-2 transition-all">
+                        <i data-lucide="user" class="w-3 h-3"></i> Login
+                    </a>
+                `;
+            }
+        }
+
+        // ฟังก์ชันสำหรับออกจากระบบ
+        function logout() {
+            localStorage.removeItem('memberName');
+            // หากมีเก็บ Token หรือข้อมูลอื่นๆ ไว้ด้วย สามารถเพิ่มคำสั่ง localStorage.removeItem('...'); ตรงนี้ได้เลยครับ
+            window.location.reload();
+        }
+
+        // แก้ไขให้โหลดไอคอน Lucide และตรวจสอบสถานะทันทีตั้งแต่เริ่มต้นเว็บ
         window.onload = () => {
+            checkLoginStatus(); 
             init();
             lucide.createIcons();
         };

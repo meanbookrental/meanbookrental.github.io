@@ -31,7 +31,7 @@
             min-height: 100vh;
             margin: 0;
             overflow-x: hidden;
-            position: relative; /* เพิ่ม relative เพื่อให้ปุ่ม absolute อ้างอิงจากตัว body */
+            position: relative; /* สำหรับปุ่ม absolute */
         }
         /* Background Decoration */
         .bg-glow {
@@ -45,7 +45,7 @@
             right: -15vw;
         }
 
-        /* Back to Home Button - เปลี่ยนจาก fixed เป็น absolute */
+        /* Back to Home Button - แบบล็อคตำแหน่งเดิม */
         .back-home {
             position: absolute;
             top: 2rem;
@@ -91,7 +91,7 @@
             outline: none;
         }
 
-        /* ปรับปรุงการแก้ปัญหาแถบทึบเวลา Autofill ให้เด็ดขาดขึ้น */
+        /* ป้องกันแถบทึบเวลา Autofill */
         .input-field:-webkit-autofill,
         .input-field:-webkit-autofill:hover, 
         .input-field:-webkit-autofill:focus,
@@ -102,7 +102,6 @@
             caret-color: white;
         }
 
-        /* Placeholder color */
         .input-field::placeholder {
             color: rgba(255, 255, 255, 0.15);
             font-weight: 300;
@@ -121,7 +120,6 @@
         }
         .btn-action:active { transform: translateY(0); }
 
-        /* Loading Spinner */
         .loader {
             border: 2px solid rgba(0,0,0,0.1);
             border-top: 2px solid #000000;
@@ -218,20 +216,18 @@
     </div>
 
     <script>
-        // URL สำหรับตรวจสอบการ Login (อันเดิม)
+        // URL ของ Web App สำหรับตรวจสอบการ Login
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwoET1BxgdnCu8YcY0B3X11qtLnl1d7xCaB60Kd2_T32aV0P_VvJ-WDXTJ98WNmK7brRw/exec';
         
-        // ลิงก์สำหรับดึงข้อมูล Favicon (แปลงท้ายลิงก์เป็นแบบ CSV เพื่อให้โค้ดของคุณเมอ่านค่าได้)
+        // ลิงก์สำหรับดึงข้อมูล Favicon
         const ASSETS_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSboMt8lu6Md3_4KGIZ3QoBCeCO-3RGCg0TVnD4B-zy4TOjQrFExssmO34xciDHLCFUCBhQC3Wixto3/pub?gid=283486066&single=true&output=csv';
 
-        // ฟังก์ชันช่วยแปลง URL รูปภาพ Google Drive ให้แสดงผลได้
         function formatDriveImageUrl(url) {
             if (!url) return '';
             const fileIdMatch = url.match(/[-\w]{25,}/);
             return fileIdMatch ? `https://lh3.googleusercontent.com/d/${fileIdMatch[0]}` : url;
         }
 
-        // ฟังก์ชันดึงข้อมูลแบบเดียวกับหน้าหลัก
         async function init() {
             try {
                 const assetResponse = await fetch(ASSETS_SHEET_URL);
@@ -239,19 +235,16 @@
                     const assetData = await assetResponse.text();
                     const assetRows = assetData.split('\n');
                     assetRows.forEach(row => {
-                        // แยกข้อมูลตามคอลัมน์แบบ CSV
                         const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                         const key = cols[0]?.replace(/"/g, '').trim();
                         const value = cols[1]?.replace(/"/g, '').trim();
-                        
-                        // ถ้าเจอคำว่า Favicon ให้เอาลิงก์ไปใส่
                         if (key === 'Favicon') {
                             document.getElementById('dynamic-favicon').href = formatDriveImageUrl(value);
                         }
                     });
                 }
             } catch (e) {
-                console.warn('ไม่สามารถดึงข้อมูล Favicon ได้:', e);
+                console.warn('Cannot load Favicon:', e);
             }
         }
 
@@ -274,6 +267,7 @@
             const msgText = document.getElementById('msgText');
             const msgIcon = document.getElementById('msgIcon');
             msgBox.className = 'mt-6 p-5 rounded-[24px] flex items-start space-x-4 border backdrop-blur-md transition-all duration-300 transform scale-100 opacity-100';
+            
             if (status === 'success') {
                 msgBox.classList.add('bg-emerald-500/10', 'text-emerald-400', 'border-emerald-500/20');
                 msgIcon.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5"></i>';
@@ -294,37 +288,28 @@
             const btn = document.getElementById('submitBtn');
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            
             btn.disabled = true;
             btn.innerHTML = '<span class="loader"></span> ตรวจสอบข้อมูล...';
             document.getElementById('msgBox').classList.add('hidden');
+            
             try {
-                // ส่งข้อมูลแบบ POST โดยใช้ JSON.stringify ผ่าน body
-                // แนะนำให้ใช้ text/plain เพื่อเลี่ยงปัญหา CORS Preflight ของ Google Apps Script
-                const response = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'text/plain;charset=utf-8',
-                    },
-                    body: JSON.stringify({
-                        email: email,
-                        password: password
-                    })
-                });
-                
+                const response = await fetch(`${WEB_APP_URL}?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`);
                 const result = await response.json();
                 
                 if (result.status === 'success') {
                     localStorage.setItem('meanbook_user', JSON.stringify({ name: result.name || 'Member', address: result.address || '-' }));
-                    showMessage('success', 'ยินดีต้อนรับครับ', `คุณ ${result.name} เข้าสู่ระบบสำเร็จ ระบบกำลังนำท่านกลับหน้าหลัก...`);
+                    showMessage('success', 'ยินดีต้อนรับ', 'เข้าสู่ระบบสำเร็จ ระบบกำลังนำท่านกลับหน้าหลัก...');
                     setTimeout(() => window.location.href = 'https://meanbookrental.github.io/', 2000);
                 } else if (result.status === 'pending') {
-                    showMessage('pending', 'อยู่ระหว่างรออนุมัติ', 'บัญชีสมาชิกของคุณอยู่ระหว่างการรออนุมัติจากเจ้าหน้าที่ครับ');
+                    showMessage('pending', 'อยู่ระหว่างรออนุมัติ', 'บัญชีสมาชิกของคุณอยู่ระหว่างการรออนุมัติจากเจ้าหน้าที่');
+                } else if (result.status === 'disabled') {
+                    showMessage('fail', 'บัญชีถูกระงับ', result.message || 'บัญชีนี้ถูกยกเลิกการใช้งาน กรุณาติดต่อแอดมิน');
                 } else {
-                    showMessage('fail', 'ข้อมูลไม่ถูกต้อง', 'อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง');
+                    showMessage('fail', 'ข้อมูลไม่ถูกต้อง', result.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง');
                 }
             } catch (err) {
                 console.error("Fetch Error:", err);
-                // ดักจับ Error CORS เพื่อแสดงข้อความที่เข้าใจง่ายขึ้น
                 if (err.message === 'Failed to fetch' || err.name === 'TypeError') {
                     showMessage('fail', 'ถูกบล็อกความปลอดภัย (CORS)', 'กรุณาตั้งค่า Google Apps Script สิทธิ์ Who has access ให้เป็น "Anyone" (ทุกคน)');
                 } else {
@@ -343,4 +328,3 @@
     </script>
 </body>
 </html>
-

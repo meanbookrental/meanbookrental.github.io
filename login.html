@@ -294,7 +294,6 @@
             document.getElementById('msgBox').classList.add('hidden');
             
             try {
-                // ส่งข้อมูลด้วย POST และแนบเป็น String ใน body เพิ่อให้สคริปต์หน้าบ้านรับแบบ doPost(e) ได้อย่างถูกต้อง
                 const response = await fetch(WEB_APP_URL, {
                     method: 'POST',
                     headers: {
@@ -308,26 +307,22 @@
                 
                 const result = await response.json();
                 
-                // ตรวจสอบสถานะตามเงื่อนไขที่ผู้ใช้ระบุ
+                // ตรวจสอบสถานะตามเงื่อนไข
                 if (result.status === 'success') {
                     localStorage.setItem('meanbook_user', JSON.stringify({ name: result.name || 'Member', address: result.address || '-' }));
-                    
-                    // บันทึกชื่อและที่อยู่แยกต่างหากเพื่อให้หน้าหลัก (index.html) ดึงไปแสดงผลบน Navbar
                     localStorage.setItem('memberName', result.name || '');
                     localStorage.setItem('memberAddress', result.address || '');
 
-                    // ตัดคำว่า "ครับ" และชื่อของผู้ใช้ออก
                     showMessage('success', 'ยินดีต้อนรับ', 'เข้าสู่ระบบสำเร็จ ระบบกำลังนำท่านกลับหน้าหลัก...');
                     setTimeout(() => window.location.href = 'https://meanbookrental.github.io/', 2000);
                 } else if (result.status === 'pending') {
-                    // ตัดคำว่า "ครับ" ออก
                     showMessage('pending', 'อยู่ระหว่างรออนุมัติ', 'บัญชีสมาชิกของคุณอยู่ระหว่างการรออนุมัติจากเจ้าหน้าที่');
                 } else if (result.status === 'disabled') {
-                    // ดึงข้อความจาก data.message
-                    showMessage('fail', 'บัญชีถูกล็อค', result.message || 'บัญชีนี้ถูกล็อคการใช้งาน กรุณาติดต่อแอดมิน');
+                    // ใช้ข้อความ (message) จากฝั่งเซิร์ฟเวอร์แบบ 100% 
+                    showMessage('fail', 'ถูกระงับการใช้งาน', result.message);
                 } else {
-                    // ดึงข้อความจาก data.message สำหรับสถานะอื่นๆ ที่นอกเหนือจากด้านบน
-                    showMessage('fail', 'ข้อมูลไม่ถูกต้อง', result.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง');
+                    // ใช้ข้อความจากฝั่งเซิร์ฟเวอร์สำหรับกรณีอื่นๆ เช่น รหัสผ่านผิด แจ้งจำนวนครั้งที่เหลือ
+                    showMessage('fail', 'เข้าสู่ระบบไม่สำเร็จ', result.message);
                 }
             } catch (err) {
                 console.error("Fetch Error:", err);
@@ -349,4 +344,3 @@
     </script>
 </body>
 </html>
-

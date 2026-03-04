@@ -730,16 +730,21 @@
             try {
                 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwoET1BxgdnCu8YcY0B3X11qtLnl1d7xCaB60Kd2_T32aV0P_VvJ-WDXTJ98WNmK7brRw/exec';
                 
-                // แปลงข้อมูลให้อยู่ในรูปแบบ Form เพื่อส่งเข้า Apps Script ได้ง่ายที่สุด (หลีกเลี่ยงปัญหา CORS Preflight)
-                const payload = new URLSearchParams();
-                payload.append('action', 'googleLogin');
-                payload.append('google_id', googleId);
-                payload.append('email', email);
-                payload.append('name', name);
+                // เตรียมข้อมูลเป็น Object ตามปกติ
+                const requestData = {
+                    action: 'googleLogin',
+                    google_id: googleId,
+                    email: email,
+                    name: name
+                };
 
+                // ส่งข้อมูลด้วย POST และใช้ Content-Type: text/plain เพื่อเลี่ยง CORS Preflight
                 const res = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    body: payload
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8'
+                    },
+                    body: JSON.stringify(requestData)
                 });
                 
                 // ดึงผลลัพธ์จาก Apps Script (คาดหวังผลลัพธ์เป็น JSON)

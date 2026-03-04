@@ -754,13 +754,13 @@
                     window.location.href = 'complete-profile.html';
                 } else if (result.status === 'pending') {
                     // สมัครแล้วแต่รออนุมัติ -> โชว์ข้อความเตือนสวยๆ ใน Modal
-                    showLoginError('บัญชีของคุณอยู่ระหว่างรอการอนุมัติครับ');
+                    showLoginError('บัญชีของคุณอยู่ระหว่างรอการอนุมัติ');
                 } else {
                     showLoginError('เกิดข้อผิดพลาดจากระบบหลังบ้าน');
                 }
             } catch (error) {
                 console.error('Login Error:', error);
-                showLoginError('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่ครับ');
+                showLoginError('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่');
             }
         }
 

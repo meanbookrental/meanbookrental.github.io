@@ -415,6 +415,17 @@
                         if (key === 'Favicon') {
                             document.getElementById('dynamic-favicon').href = formatDriveImageUrl(value);
                         }
+                        // ดึงรูปภาพ Logo มาใส่ตามจุดต่างๆ
+                        if (key === 'Logo') {
+                            const logoUrl = formatDriveImageUrl(value);
+                            const navLogo = document.getElementById('navLogoImg');
+                            const modalLogo = document.getElementById('modalLogoImg');
+                            const footerLogo = document.getElementById('footerLogoImg');
+                            
+                            if (navLogo) navLogo.src = logoUrl;
+                            if (modalLogo) modalLogo.src = logoUrl;
+                            if (footerLogo) footerLogo.src = logoUrl;
+                        }
                     });
                 } else { loadDefaultBanner(); }
             } catch (e) { loadDefaultBanner(); }
@@ -675,9 +686,10 @@
                 client_id: '823115057358-bnejgri6f6ko2dnj8gqs731te6p0eg7r.apps.googleusercontent.com',
                 callback: handleCredentialResponse
             });
+            // เปลี่ยนรูปร่างเป็นแคปซูล (pill) และเปลี่ยนคำเป็น ดำเนินการต่อด้วย Google
             google.accounts.id.renderButton(
                 document.getElementById("googleButtonContainer"),
-                { theme: "outline", size: "large", shape: "rectangular", width: 250 }
+                { theme: "outline", size: "large", shape: "pill", width: 250, text: "continue_with" }
             );
             
             // รีเซ็ตการแสดงผล
